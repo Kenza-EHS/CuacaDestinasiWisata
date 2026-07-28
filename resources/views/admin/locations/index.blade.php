@@ -57,6 +57,14 @@
                                 <i class="bi bi-pencil-square me-1"></i> Edit Data
                             </a>
                         </td>
+                        <form action="{{ route('admin.locations.destroy', $loc->id) }}" method="POST" class="d-inline"
+                            onsubmit="return confirm('Yakin hapus {{ $loc->name }}? Seluruh histori cuaca & AQI-nya akan ikut terhapus dan tidak bisa dikembalikan.');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold ms-2">
+                                <i class="bi bi-trash3 me-1"></i> Hapus
+                            </button>
+                        </form>
                     </tr>
                     @endforeach
                 </tbody>

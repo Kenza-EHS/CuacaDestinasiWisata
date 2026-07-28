@@ -43,4 +43,5 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/locations', [LocationController::class, 'index'])->name('locations.index');
     Route::get('/locations/{id}/edit', [LocationController::class, 'edit'])->name('locations.edit');
     Route::put('/locations/{id}', [LocationController::class, 'update'])->name('locations.update');
+    Route::delete('/locations/{id}', [LocationController::class, 'destroy'])->name('locations.destroy');
 });
