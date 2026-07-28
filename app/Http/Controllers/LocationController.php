@@ -123,6 +123,9 @@ class LocationController extends Controller
     {
         $location_id = $request->input('location_id');
         $image_url = $request->input('image_url');
+        $request->validate([
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Maksimal 2MB (2048 KB)
+        ]);
 
         // PERBAIKAN: Hanya update foto jika kolom "image_url" diisi oleh admin
         if (!empty($image_url)) {
@@ -156,12 +159,3 @@ class LocationController extends Controller
         return redirect()->back()->with('success', 'Parameter berhasil diperbarui!');
     }
 }
-// Di dalam method update():
-WeatherData::create([
-    'location_id' => $location->id,
-    'temperature' => $request->temperature,
-    'humidity'    => $request->humidity,
-    'wind_speed'  => $request->wind_speed,
-    'condition'   => $request->condition,
-    'recorded_at' => now(), // <-- Tambahkan ini juga
-]);

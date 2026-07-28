@@ -28,6 +28,9 @@
                     <form action="{{ route('admin.locations.update', $location->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+                        
+                        <input type="file" name="image">
+                        <button type="submit">Simpan</button>
 
                         <!-- Section 1: Info Destinasi -->
                         <h5 class="fw-bold text-primary mb-3"><i class="bi bi-geo-alt me-2"></i>Informasi Destinasi</h5>
