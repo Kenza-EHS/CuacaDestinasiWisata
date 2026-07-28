@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Location; // Ditambahkan agar tidak error Class Not Found
 
 class LocationController extends Controller
 {
@@ -108,89 +109,123 @@ class LocationController extends Controller
         if ($page === 'locations') {
             $data['locations'] = DB::select("SELECT * FROM locations ORDER BY location_id ASC");
         } elseif ($page === 'weather') {
-            // PERBAIKAN: Mengubah ORDER BY w.id menjadi w.created_at
             $data['weathers'] = DB::select("SELECT w.*, l.name FROM weather_data w JOIN locations l ON w.location_id = l.location_id ORDER BY w.created_at DESC");
         } elseif ($page === 'air') {
-            // PERBAIKAN: Mengubah ORDER BY a.id menjadi a.created_at
             $data['airs'] = DB::select("SELECT a.*, l.name FROM air_qualities a JOIN locations l ON a.location_id = l.location_id ORDER BY a.created_at DESC");
         }
 
         return view('admin.dashboard', compact('page', 'data'));
     }
 
-    // PERBAIKAN UTAMA: Menyimpan inputan parameter cuaca baru ke database pgAdmin
+    // SIMPAN PARAMETER BARU (Form Tambah Data Admin)
     public function store(Request $request)
     {
-        $location_id = $request->input('location_id');
-        $image_url = $request->input('image_url');
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Maksimal 2MB (2048 KB)
+            'location_id' => 'required',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image_url'   => 'nullable|string',
         ]);
 
-        // PERBAIKAN: Hanya update foto jika kolom "image_url" diisi oleh admin
+        $location_id = $request->input('location_id');
+        $image_url   = $request->input('image_url');
+
+        // Handling upload file foto via Input File HTML
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $path = $request->file('image')->store('locations', 'public');
+            $image_url = $path;
+        }
+
+        // Update foto di tabel locations jika ada input foto/link
         if (!empty($image_url)) {
-            \DB::update("UPDATE locations SET image_url = ?, updated_at = ? WHERE location_id = ?", [
+            DB::update("UPDATE locations SET image_url = ?, updated_at = ? WHERE location_id = ?", [
                 $image_url,
                 now(),
                 $location_id
             ]);
         }
 
-        // Logika insert data cuaca bawahnya tetap biarkan seperti biasa...
-        \DB::insert("INSERT INTO weather_data (location_id, temperature, humidity, condition, observation_time, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", [
-            $location_id,
-            $request->input('temperature'),
-            $request->input('humidity'),
-            $request->input('condition'),
-            now(),
-            now(),
-            now()
-        ]);
-
-        // Logika insert data kualitas udara bawahnya tetap biarkan seperti biasa...
-        \DB::insert("INSERT INTO air_qualities (location_id, ispu_value, category, created_at, updated_at) VALUES (?, ?, ?, ?, ?)", [
-            $location_id,
-            $request->input('ispu_value'),
-            $request->input('category'),
-            now(),
-            now()
-        ]);
-    }
-    
-    public function update(Request $request, $id)
-    {
-        $location = Location::findOrFail($id);
-
-        // Validasi file
-        $request->validate([
-            'name' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // max 2MB
-        ]);
-
-        $data = $request->except('image');
-
-        // PENANGANAN FOTO YANG BENAR
-        if ($request->hasFile('image')) {
-            // Simpan file ke storage/app/public/locations dan ambil path-nya
-            $imagePath = $request->file('image')->store('locations', 'public');
-            
-            // Simpan hanya path string-nya ke database (contoh: "locations/abc123.jpg")
-            $data['image'] = $imagePath;
-        }
-
-        $location->update($data);
-
-        // Catat log (jika menggunakan AuditLog)
-        if (class_exists('App\Models\AuditLog')) {
-            \App\Models\AuditLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'UPDATE_LOCATION',
-                'target' => $location->name,
-                'description' => 'Memperbarui data lokasi ' . $location->name,
+        // Insert data cuaca
+        if ($request->filled('temperature')) {
+            DB::insert("INSERT INTO weather_data (location_id, temperature, humidity, condition, observation_time, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", [
+                $location_id,
+                $request->input('temperature'),
+                $request->input('humidity'),
+                $request->input('condition'),
+                now(),
+                now(),
+                now()
             ]);
         }
 
-        return redirect()->back()->with('success', 'Data berhasil diperbarui!');
-    
+        // Insert data kualitas udara
+        if ($request->filled('ispu_value')) {
+            DB::insert("INSERT INTO air_qualities (location_id, ispu_value, category, created_at, updated_at) VALUES (?, ?, ?, ?, ?)", [
+                $location_id,
+                $request->input('ispu_value'),
+                $request->input('category'),
+                now(),
+                now()
+            ]);
+        }
+
+        // Catat Log Aktivitas
+        $this->recordLog('TAMBAH_DATA', 'Lokasi ID: ' . $location_id, 'Menambahkan parameter cuaca/udara/foto baru');
+
+        return redirect()->back()->with('success', 'Data parameter berhasil disimpan!');
+    }
+
+    // UPDATE DATA LOKASI DAN FOTO (Form Edit)
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name'  => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $locationName = $request->input('name');
+        $imagePath = null;
+
+        // Proses unggah file foto
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $imagePath = $request->file('image')->store('locations', 'public');
+        }
+
+        // Query update yang mendukung struktur pgAdmin (kolom location_id & image_url)
+        if ($imagePath && $locationName) {
+            DB::update("UPDATE locations SET name = ?, image_url = ?, updated_at = ? WHERE location_id = ?", [
+                $locationName, $imagePath, now(), $id
+            ]);
+        } elseif ($imagePath) {
+            DB::update("UPDATE locations SET image_url = ?, updated_at = ? WHERE location_id = ?", [
+                $imagePath, now(), $id
+            ]);
+        } elseif ($locationName) {
+            DB::update("UPDATE locations SET name = ?, updated_at = ? WHERE location_id = ?", [
+                $locationName, now(), $id
+            ]);
+        }
+
+        // Catat Audit Log
+        $targetName = $locationName ?? 'ID ' . $id;
+        $this->recordLog('UPDATE_LOCATION', $targetName, 'Memperbarui data & foto lokasi ' . $targetName);
+
+        return redirect()->back()->with('success', 'Data lokasi dan foto berhasil diperbarui!');
+    }
+
+    // Helper Fungsi untuk Mencatat Audit Log secara Aman
+    private function recordLog($action, $target, $description)
+    {
+        try {
+            if (class_exists('App\Models\AuditLog')) {
+                \App\Models\AuditLog::create([
+                    'user_id'     => auth()->id() ?? 1, // Fallback ke Admin ID 1
+                    'action'      => $action,
+                    'target'      => $target,
+                    'description' => $description,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Gagal mencatat Audit Log: ' . $e->getMessage());
+        }
     }
 }
