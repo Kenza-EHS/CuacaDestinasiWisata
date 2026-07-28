@@ -5,4 +5,4 @@ providers = ["php", "node"]
 nixPkgs = ["...", "php82", "php82Extensions.pdo_pgsql", "composer", "nodejs"]
 
 [start]
-cmd = "php artisan storage:link && php artisan migrate --force && php artisan config:cache && php -d upload_max_filesize=10M -d post_max_size=12M -d max_execution_time=120 -d memory_limit=256M -S 0.0.0.0:$PORT -t public vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"
+cmd = "php artisan route:clear && php artisan storage:link && php artisan migrate --force && php artisan config:cache && php -d upload_max_filesize=10M -d post_max_size=12M -d max_execution_time=120 -d memory_limit=256M -S 0.0.0.0:$PORT -t public vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"
