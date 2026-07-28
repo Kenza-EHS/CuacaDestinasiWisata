@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Cuaca KSPN Indonesia')</title>
 
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts & Bootstrap 5 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            --accent-blue: #38bdf8;
-            --accent-cyan: #06b6d4;
             --card-border-radius: 20px;
         }
 
@@ -36,54 +32,6 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .hero-banner {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 5rem 0 6rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card-kspn {
-            border: none;
-            border-radius: var(--card-border-radius);
-            background: #ffffff;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        .card-kspn:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.15);
-        }
-
-        .card-img-wrapper {
-            position: relative;
-            height: 220px;
-            overflow: hidden;
-        }
-
-        .card-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .badge-location {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(8px);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 50px;
-            font-size: 0.78rem;
-            font-weight: 600;
         }
 
         .footer-custom {
@@ -118,13 +66,13 @@
                     </li>
 
                     @if(session('admin_logged_in'))
-                        <!-- DROPDOWN ADMIN -->
+                        <!-- JIKA LOGIN SEBAGAI ADMIN -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                 <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
                                     A
                                 </div>
-                                Administrator
+                                Admin Ekahido
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
                                 <li>
@@ -133,21 +81,21 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item py-2 fw-medium text-dark" href="/gate-secret-ekahido-2026?page=weather">
-                                        <i class="bi bi-journal-text me-2 text-info"></i>Log Aktivitas
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="/gate-secret-ekahido-2026?page=locations">
+                                        <i class="bi bi-journal-text me-2 text-info"></i>Log Aktivitas & Kelola
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/gate-secret-ekahido-2026/logout">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar Admin
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar
                                     </a>
                                 </li>
                             </ul>
                         </li>
 
                     @elseif(session('user_logged_in'))
-                        <!-- DROPDOWN USER LOGGED IN -->
+                        <!-- JIKA LOGIN SEBAGAI USER -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                 <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
@@ -157,7 +105,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
                                 <li>
-                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/logout-user">
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/logout">
                                         <i class="bi bi-box-arrow-right me-2"></i>Keluar
                                     </a>
                                 </li>
@@ -165,12 +113,12 @@
                         </li>
 
                     @else
-                        <!-- TAMPILAN GUEST (BELUM LOGIN) -->
+                        <!-- UNTUK GUEST (SATU PINTU MASUK) -->
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3 fw-medium" href="/login-user">Masuk User</a>
+                            <a class="nav-link text-white px-3 fw-medium" href="/login">Masuk</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="/gate-secret-ekahido-2026/login">Masuk Admin</a>
+                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="/login">Daftar</a>
                         </li>
                     @endif
                 </ul>

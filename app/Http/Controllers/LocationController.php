@@ -7,24 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class LocationController extends Controller
 {
-    // ================= HALAMAN USER =================
-    public function showUserLogin()
-    {
-        if (session()->has('user_logged_in')) {
-            return redirect('/dashboard-wisata');
-        }
-        return view('login-user');
-    }
-
-    public function handleUserLogin(Request $request)
-    {
-        if ($request->username === 'user' && $request->password === 'user123') {
-            session(['user_logged_in' => true]);
-            return redirect('/dashboard-wisata');
-        }
-        return redirect()->back()->with('error', 'Kredensial Pengguna Salah!');
-    }
-
+    // ================= HALAMAN UTAMA (USER DASHBOARD) =================
     public function index()
     {
         $destinations = DB::select("
@@ -58,40 +41,57 @@ class LocationController extends Controller
         return view('welcome', compact('destinations'));
     }
 
-    public function userLogout()
-    {
-        session()->forget('user_logged_in');
-        return redirect('/');
-    }
-
-    // ================= HALAMAN ADMIN =================
+    // ================= SATU PINTU LOGIN (BISA ADMIN / USER) =================
     public function showLogin()
     {
         if (session()->has('admin_logged_in')) {
-            return redirect()->route('admin.dashboard');
+            return redirect('/gate-secret-ekahido-2026?page=weather');
+        }
+        if (session()->has('user_logged_in')) {
+            return redirect('/');
+        }
+        
+        // Memakai view login yang ada
+        if (view()->exists('login-user')) {
+            return view('login-user');
         }
         return view('admin.login');
     }
 
     public function handleLogin(Request $request)
     {
-        if ($request->username === 'ekahido' && $request->password === 'ekahido22') {
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        // Check 1: Jika Kredensial Admin
+        if ($username === 'ekahido' && $password === 'ekahido22') {
             session(['admin_logged_in' => true]);
-            return redirect()->route('admin.dashboard');
+            session()->forget('user_logged_in');
+            return redirect('/gate-secret-ekahido-2026?page=weather')->with('success', 'Selamat datang Admin!');
         }
-        return redirect()->back()->with('error', 'Kredensial Admin Salah!');
+
+        // Check 2: Jika Kredensial User
+        if ($username === 'user' && $password === 'user123') {
+            session(['user_logged_in' => true]);
+            session()->forget('admin_logged_in');
+            return redirect('/')->with('success', 'Berhasil masuk sebagai Pengguna!');
+        }
+
+        return redirect()->back()->with('error', 'Username atau Password salah!');
     }
 
     public function logout()
     {
         session()->forget('admin_logged_in');
-        return redirect('/');
+        session()->forget('user_logged_in');
+        return redirect('/')->with('success', 'Berhasil keluar!');
     }
 
+    // ================= DASHBOARD ADMIN & LOG AKTIVITAS =================
     public function adminPanel(Request $request)
     {
         if (!session()->has('admin_logged_in')) {
-            return redirect()->route('admin.login');
+            return redirect('/login')->with('error', 'Silakan masuk sebagai admin terlebih dahulu.');
         }
 
         $page = $request->query('page', 'weather'); 
@@ -110,13 +110,12 @@ class LocationController extends Controller
         return view('admin.dashboard', compact('page', 'data'));
     }
 
-    // ================= SIMPAN & UPDATE DATA (AMAN DARI ERROR 500) =================
+    // ================= SIMPAN & UPDATE DATA (FREE ERROR 500) =================
     public function store(Request $request)
     {
         $location_id = $request->input('location_id');
         $image_url = $request->input('image_url');
 
-        // Handling Upload Foto File
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $image_url = $request->file('image')->store('locations', 'public');
         }
