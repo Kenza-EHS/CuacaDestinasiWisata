@@ -3,22 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
 
 class PublicLocationController extends Controller
 {
-    public function index(): View
+    // Fungsi index untuk menampilkan semua lokasi
+    public function index()
     {
-        $locations = Location::with(['latestWeather', 'latestAirQuality'])->get();
-
-        return view('landing', compact('locations'));
+        $locations = Location::all();
+        return view('user.locations.index', compact('locations'));
     }
 
-    public function show(Location $location): View
+    // Hanya boleh ada SATU fungsi show() ini:
+    public function show($slug)
     {
-        // Load riwayat penuh untuk user terautentikasi
-        $location->load(['latestWeather', 'latestAirQuality', 'weatherLogs', 'airQualityLogs']);
+        // Mengambil data lokasi berdasarkan slug
+        $location = Location::where('slug', $slug)->firstOrFail();
 
-        return view('destinations.show', compact('location'));
+        // Mengirimkan variabel $location ke view
+        return view('user.weather-detail', compact('location'));
     }
 }
