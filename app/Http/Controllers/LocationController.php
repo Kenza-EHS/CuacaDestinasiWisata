@@ -155,7 +155,42 @@ class LocationController extends Controller
             now(),
             now()
         ]);
+    }
+    
+    public function update(Request $request, $id)
+    {
+        $location = Location::findOrFail($id);
 
-        return redirect()->back()->with('success', 'Parameter berhasil diperbarui!');
+        // Validasi file
+        $request->validate([
+            'name' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // max 2MB
+        ]);
+
+        $data = $request->except('image');
+
+        // PENANGANAN FOTO YANG BENAR
+        if ($request->hasFile('image')) {
+            // Simpan file ke storage/app/public/locations dan ambil path-nya
+            $imagePath = $request->file('image')->store('locations', 'public');
+            
+            // Simpan hanya path string-nya ke database (contoh: "locations/abc123.jpg")
+            $data['image'] = $imagePath;
+        }
+
+        $location->update($data);
+
+        // Catat log (jika menggunakan AuditLog)
+        if (class_exists('App\Models\AuditLog')) {
+            \App\Models\AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'UPDATE_LOCATION',
+                'target' => $location->name,
+                'description' => 'Memperbarui data lokasi ' . $location->name,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil diperbarui!');
+    
     }
 }
