@@ -6,7 +6,7 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card card-kspn">
                 <div class="card-body p-4 p-md-5">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h3 class="fw-bold text-dark mb-0">Update Data KSPN</h3>
@@ -25,66 +25,61 @@
                         </div>
                     @endif
 
-                    {{-- Alert Notifikasi --}}
                     @if(session('success'))
-                        <div class="p-4 mb-4 text-sm text-green-800 bg-green-100 rounded-lg">
+                        <div class="alert alert-success border-0 rounded-3 mb-4">
                             {{ session('success') }}
                         </div>
                     @endif
 
-                    {{-- PASTIKAN ENCTYPE TERPASANG DENGAN BENAR --}}
-                    <form action="{{ route('admin.locations.update', $location->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <form action="{{ route('admin.locations.update', $location->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
-                        <div class="border-b pb-4">
-                            <h2 class="text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
-                                📍 Informasi Destinasi
-                            </h2>
+                        {{-- Section 1: Informasi Destinasi --}}
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-geo-alt-fill me-2"></i>Informasi Destinasi
+                        </h5>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Destinasi KSPN</label>
-                                    <input type="text" name="name" value="{{ old('name', $location->name) }}" class="w-full border-gray-300 rounded-lg p-2.5 border" required>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kota / Kabupaten</label>
-                                    <input type="text" name="city" value="{{ old('city', $location->city) }}" class="w-full border-gray-300 rounded-lg p-2.5 border">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
-                                    <input type="text" name="province" value="{{ old('province', $location->province) }}" class="w-full border-gray-300 rounded-lg p-2.5 border">
-                                </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small text-secondary">Nama Destinasi KSPN</label>
+                                <input type="text" name="name" value="{{ old('name', $location->name) }}" class="form-control rounded-3" required>
                             </div>
 
-                            {{-- BAGIAN FOTO --}}
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Foto Real Destinasi</label>
-                                
-                                {{-- Tampilkan Pratinjau Foto jika Ada --}}
-                                @if($location->image)
-                                    <div class="mb-3">
-                                        <img src="{{ asset('storage/' . $location->image) }}" alt="{{ $location->name }}" class="w-48 h-32 object-cover rounded-lg border">
-                                    </div>
-                                @endif
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-secondary">Kota / Kabupaten</label>
+                                <input type="text" name="city" value="{{ old('city', $location->city) }}" class="form-control rounded-3" required>
+                            </div>
 
-                                <input type="file" name="image" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-                                <p class="text-xs text-gray-500 mt-1">Upload gambar real destinasi (JPG, PNG, WEBP max 2MB)</p>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-secondary">Provinsi</label>
+                                <input type="text" name="province" value="{{ old('province', $location->province) }}" class="form-control rounded-3" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small text-secondary">Deskripsi</label>
+                                <textarea name="description" rows="3" class="form-control rounded-3">{{ old('description', $location->description) }}</textarea>
                             </div>
                         </div>
 
-                        {{-- TOMBOL SIMPAN DI BAAGIAN BIKIN BAWAH --}}
-                        <div class="flex justify-end pt-4">
-                            <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm">
-                                Simpan Perubahan
-                            </button>
+                        {{-- Bagian Foto --}}
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-secondary d-block">Foto Real Destinasi</label>
+
+                            @if($location->image)
+                                <div class="mb-3">
+                                    <img src="{{ asset('storage/' . $location->image) }}" alt="{{ $location->name }}"
+                                         class="rounded-3 border" style="width: 192px; height: 128px; object-fit: cover;">
+                                </div>
+                            @endif
+
+                            <input type="file" name="image" class="form-control rounded-3">
+                            <small class="text-muted">Upload gambar real destinasi (JPG, PNG, WEBP max 2MB)</small>
                         </div>
 
                         <hr class="my-4">
 
-                        <!-- Section 2: Input Cuaca Terkini -->
+                        {{-- Section 2: Input Cuaca Terkini --}}
                         <h5 class="fw-bold text-primary mb-3"><i class="bi bi-cloud-sun me-2"></i>Pembaruan Data Cuaca & AQI</h5>
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
@@ -124,7 +119,9 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-bold">Simpan Pembaruan</button>
+                        <button type="submit" class="btn btn-custom-primary w-100 fw-bold">
+                            <i class="bi bi-check-circle me-1"></i> Simpan Pembaruan
+                        </button>
                     </form>
                 </div>
             </div>

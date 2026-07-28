@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\WeatherData;
 use App\Models\AirQuality;
 use Illuminate\Http\Request;
+use App\Models\AuditLog;
 
 class LocationController extends Controller
 {
