@@ -118,7 +118,7 @@
                     </li>
 
                     @if(session('admin_logged_in'))
-                        <!-- PROFIL DROPDOWN UNTUK ADMIN -->
+                        <!-- DROPDOWN ADMIN -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                 <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
@@ -128,20 +128,18 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
                                 <li>
-                                    <a class="dropdown-item py-2 fw-medium text-dark" href="{{ route('admin.dashboard') }}">
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="/gate-secret-ekahido-2026?page=weather">
                                         <i class="bi bi-speedometer2 me-2 text-warning"></i>Panel Admin
                                     </a>
                                 </li>
-                                @if(Route::has('admin.logs'))
                                 <li>
-                                    <a class="dropdown-item py-2 fw-medium text-dark" href="{{ route('admin.logs') }}">
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="/gate-secret-ekahido-2026?page=weather">
                                         <i class="bi bi-journal-text me-2 text-info"></i>Log Aktivitas
                                     </a>
                                 </li>
-                                @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger py-2 fw-medium" href="{{ route('admin.logout') }}">
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/gate-secret-ekahido-2026/logout">
                                         <i class="bi bi-box-arrow-right me-2"></i>Keluar Admin
                                     </a>
                                 </li>
@@ -149,7 +147,7 @@
                         </li>
 
                     @elseif(session('user_logged_in'))
-                        <!-- PROFIL DROPDOWN UNTUK USER LOGGED IN -->
+                        <!-- DROPDOWN USER LOGGED IN -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                 <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
@@ -159,7 +157,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
                                 <li>
-                                    <a class="dropdown-item text-danger py-2 fw-medium" href="{{ route('user.logout') }}">
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/logout-user">
                                         <i class="bi bi-box-arrow-right me-2"></i>Keluar
                                     </a>
                                 </li>
@@ -167,12 +165,12 @@
                         </li>
 
                     @else
-                        <!-- TAMPILAN JIKA BELUM LOGIN -->
+                        <!-- TAMPILAN GUEST (BELUM LOGIN) -->
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3 fw-medium" href="{{ route('user.login') }}">Masuk</a>
+                            <a class="nav-link text-white px-3 fw-medium" href="/login-user">Masuk User</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="{{ route('admin.login') }}">Admin Login</a>
+                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="/gate-secret-ekahido-2026/login">Masuk Admin</a>
                         </li>
                     @endif
                 </ul>
