@@ -43,11 +43,11 @@ class LocationController extends Controller
 
         // Validasi Data (Termasuk Range Suhu -40 s/d 60 & Kelembaban 0-100%)
         $request->validate([
-            'name'        => 'required|string|max:255',
+            'name'  => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'city'        => 'required|string|max:255',
             'province'    => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'temperature' => 'required|numeric|between:-40,60',
             'humidity'    => 'required|numeric|between:0,100',
             'wind_speed'  => 'required|numeric|min:0',
@@ -55,12 +55,12 @@ class LocationController extends Controller
             'aqi'         => 'required|integer|min:0',
             'aqi_status'  => 'required|string|max:255',
         ]);
-
+        $data = $request->except('image');
         // 1. Update Info Lokasi & Upload Foto Real
         $dataLocation = $request->only(['name', 'city', 'province', 'description']);
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('locations', 'public');
-            $dataLocation['image'] = $path;
+            $imagePath = $request->file('image')->store('locations', 'public');
+            $data['image'] = $imagePath;
         }
         $location->update($dataLocation);
 
@@ -84,6 +84,17 @@ class LocationController extends Controller
             'status'      => $request->aqi_status,
             'recorded_at' => now(),
         ]);
+        try {
+            \App\Models\AuditLog::create([
+                'user_id'     => auth()->id() ?? 1,
+                'action'      => 'UPDATE_LOCATION',
+                'target'      => $location->name,
+                'description' => 'Memperbarui data dan foto lokasi ' . $location->name,
+            ]);
+        } catch (\Exception $e) {
+            // Mencegah error jika tabel audit_logs bermasalah
+            \Log::error('Gagal mencatat audit log: ' . $e->getMessage());
+        }
         
 
         return redirect()->route('admin.locations.index')->with('success', 'Data KSPN & Cuaca berhasil diperbarui!');

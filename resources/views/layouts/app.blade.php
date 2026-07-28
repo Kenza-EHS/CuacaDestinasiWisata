@@ -140,30 +140,42 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top py-3">
         <div class="container">
+            <!-- Brand Logo -->
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="{{ route('home') }}">
                 <span class="p-2 rounded-3 bg-primary bg-opacity-20 text-info d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                     <i class="bi bi-cloud-sun-fill"></i>
                 </span>
                 <span class="text-white">Cuaca<span class="text-info">KSPN</span></span>
             </a>
-            
+
+            <!-- Toggle Mobile Button -->
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <!-- Nav Items -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0">
                     <li class="nav-item">
                         <a class="nav-link text-white-50 px-3 active fw-medium" href="{{ route('home') }}">Beranda</a>
                     </li>
+
                     @auth
-                        @if(auth()->user()->isAdmin())
-                            <li class="nav-item">
-                                <a class="btn btn-outline-warning btn-sm rounded-pill px-3" href="{{ route('admin.locations.index') }}">
-                                    <i class="bi bi-shield-lock-fill me-1"></i> Admin Panel
-                                </a>
-                            </li>
-                        @endif
+                        <!-- Tombol Log Aktivitas (Hanya Tampil Saat Admin Login) -->
+                        <li class="nav-item">
+                            <a class="btn btn-outline-info btn-sm rounded-pill px-3" href="{{ route('admin.logs') }}">
+                                <i class="bi bi-journal-text me-1"></i> Log Aktivitas
+                            </a>
+                        </li>
+
+                        <!-- Tombol Admin Panel -->
+                        <li class="nav-item">
+                            <a class="btn btn-outline-warning btn-sm rounded-pill px-3" href="{{ route('admin.locations.index') }}">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Admin Panel
+                            </a>
+                        </li>
+
+                        <!-- Dropdown User Profil -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                                 <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
