@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Models\WeatherData;
 use App\Models\AirQuality;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
 class LocationController extends Controller
@@ -28,6 +29,17 @@ class LocationController extends Controller
     public function update(Request $request, $id)
     {
         $location = Location::findOrFail($id);
+    
+        // Update data lokasi
+        $location->update($request->all());
+
+        // CATAT LOG KE AUDIT_LOGS
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'UPDATE_LOCATION',
+            'target' => $location->name,
+            'description' => 'Memperbarui deskripsi/foto lokasi ' . $location->name,
+        ]);
 
         // Validasi Data (Termasuk Range Suhu -40 s/d 60 & Kelembaban 0-100%)
         $request->validate([
@@ -77,3 +89,7 @@ class LocationController extends Controller
         return redirect()->route('admin.locations.index')->with('success', 'Data KSPN & Cuaca berhasil diperbarui!');
     }
 }
+
+
+
+    
