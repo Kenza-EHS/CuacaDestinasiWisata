@@ -141,7 +141,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top py-3">
         <div class="container">
             <!-- Brand Logo -->
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="{{ route('home') }}">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="{{ session('user_logged_in') ? url('/dashboard-wisata') : url('/') }}">
                 <span class="p-2 rounded-3 bg-primary bg-opacity-20 text-info d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                     <i class="bi bi-cloud-sun-fill"></i>
                 </span>
@@ -156,52 +156,80 @@
             <!-- Nav Items -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link text-white-50 px-3 active fw-medium" href="{{ route('home') }}">Beranda</a>
-                    </li>
-
-                    @auth
-                        <!-- Tombol Log Aktivitas (Hanya Tampil Saat Admin Login) -->
+                    
+                    @if(session('admin_logged_in'))
+                        <!-- BERANDA ADMIN -->
                         <li class="nav-item">
-                            <a class="btn btn-outline-info btn-sm rounded-pill px-3" href="{{ route('admin.logs') }}">
-                                <i class="bi bi-journal-text me-1"></i> Log Aktivitas
-                            </a>
+                            <a class="nav-link text-white-50 px-3 active fw-medium" href="/gate-secret-ekahido-2026?page=weather">Dashboard Admin</a>
                         </li>
 
-                        <!-- Tombol Admin Panel -->
-                        <li class="nav-item">
-                            <a class="btn btn-outline-warning btn-sm rounded-pill px-3" href="{{ route('admin.locations.index') }}">
-                                <i class="bi bi-shield-lock-fill me-1"></i> Admin Panel
-                            </a>
-                        </li>
-
-                        <!-- Dropdown User Profil -->
+                        <!-- DROPDOWN PROFIL ADMIN -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
-                                <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
-                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                    A
                                 </div>
-                                {{ auth()->user()->name }}
+                                Admin Ekahido
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2">
                                 <li>
-                                    <form action="{{ route('logout') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger py-2 fw-medium">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Keluar
-                                        </button>
-                                    </form>
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="/gate-secret-ekahido-2026?page=weather">
+                                        <i class="bi bi-speedometer2 me-2 text-primary"></i>Panel Admin
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="{{ route('admin.logs') }}">
+                                        <i class="bi bi-journal-text me-2 text-info"></i>Log Aktivitas
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/gate-secret-ekahido-2026/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar Admin
+                                    </a>
                                 </li>
                             </ul>
                         </li>
+
+                    @elseif(session('user_logged_in'))
+                        <!-- BERANDA USER -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50 px-3 active fw-medium" href="/dashboard-wisata">Beranda Wisata</a>
+                        </li>
+
+                        <!-- DROPDOWN PROFIL USER -->
+                        <li class="nav-item dropdown ms-lg-2">
+                            <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                                <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                    U
+                                </div>
+                                Pengguna
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2">
+                                <li>
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="/dashboard-wisata">
+                                        <i class="bi bi-grid-fill me-2 text-primary"></i>Dashboard Wisata
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="/logout-user">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                     @else
+                        <!-- TAMPILAN GUEST (BELUM LOGIN) -->
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3 fw-medium" href="{{ route('login') }}">Masuk</a>
+                            <a class="nav-link text-white px-3 fw-medium" href="/">Masuk User</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="{{ route('register') }}">Daftar</a>
+                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="/gate-secret-ekahido-2026/login">Masuk Admin</a>
                         </li>
-                    @endauth
+                    @endif
+
                 </ul>
             </div>
         </div>
@@ -212,6 +240,12 @@
         @if(session('success'))
             <div class="alert alert-success alert-dismissible border-0 shadow-sm rounded-4 fade show" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible border-0 shadow-sm rounded-4 fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
