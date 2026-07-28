@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Models\WeatherData;
 use App\Models\AirQuality;
-use Illuminate\Http\Request;
 use App\Models\AuditLog;
+use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
@@ -30,7 +30,7 @@ class LocationController extends Controller
     {
         $location = Location::findOrFail($id);
 
-        // Validasi Data (Termasuk Range Suhu -40 s/d 60 & Kelembaban 0-100%)
+        // 0. VALIDASI DULU, sebelum menyentuh database sama sekali
         $request->validate([
             'name'        => 'required|string|max:255',
             'city'        => 'required|string|max:255',
@@ -45,22 +45,19 @@ class LocationController extends Controller
             'aqi_status'  => 'required|string|max:255',
         ]);
 
-        // 1. Update Info Lokasi & Upload Foto Real
+        // 1. Siapkan data lokasi HANYA dari field yang memang boleh diubah lewat form ini
         $dataLocation = $request->only(['name', 'city', 'province', 'description']);
+
+        // 2. Kalau ada file gambar baru, simpan fisiknya dan masukkan path-nya ke $dataLocation
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('locations', 'public');
-            $dataLocation['image'] = $path;
+            $imagePath = $request->file('image')->store('locations', 'public');
+            $dataLocation['image'] = $imagePath;
         }
+
+        // 3. Baru simpan ke database, sekali saja, dengan data yang sudah bersih
         $location->update($dataLocation);
 
-        AuditLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'UPDATE_LOCATION',
-            'target' => $location->name,
-            'description' => 'Memperbarui deskripsi/foto lokasi ' . $location->name,
-        ]);
-
-        // 2. Update atau Buat Data Cuaca Terbaru
+        // 4. Simpan data cuaca terbaru
         WeatherData::create([
             'location_id' => $location->id,
             'temperature' => $request->temperature,
@@ -70,13 +67,26 @@ class LocationController extends Controller
             'recorded_at' => now(),
         ]);
 
-        // 3. Update atau Buat Data AQI Terbaru
+        // 5. Simpan data AQI terbaru
         AirQuality::create([
             'location_id' => $location->id,
             'aqi'         => $request->aqi,
+            'pm25'        => $request->pm25 ?? rand(10, 30),
             'status'      => $request->aqi_status,
             'recorded_at' => now(),
         ]);
+
+        // 6. Catat audit log (sekali saja)
+        try {
+            AuditLog::create([
+                'user_id'     => auth()->id(),
+                'action'      => 'UPDATE_LOCATION',
+                'target'      => $location->name,
+                'description' => 'Memperbarui data dan foto lokasi ' . $location->name,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Gagal mencatat audit log: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.locations.index')->with('success', 'Data KSPN & Cuaca berhasil diperbarui!');
     }
