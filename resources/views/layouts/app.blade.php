@@ -31,7 +31,6 @@
             flex-direction: column;
         }
 
-        /* Glassmorphism Navbar */
         .navbar-custom {
             background: rgba(15, 23, 42, 0.88);
             backdrop-filter: blur(12px);
@@ -39,7 +38,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Hero Section */
         .hero-banner {
             background: var(--primary-gradient);
             color: white;
@@ -75,10 +73,6 @@
             transition: transform 0.5s ease;
         }
 
-        .card-kspn:hover .card-img-wrapper img {
-            transform: scale(1.08);
-        }
-
         .badge-location {
             position: absolute;
             top: 15px;
@@ -105,7 +99,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top py-3">
         <div class="container">
             <!-- Brand Logo -->
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="{{ route('home') }}">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="{{ url('/') }}">
                 <span class="p-2 rounded-3 bg-primary bg-opacity-20 text-info d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                     <i class="bi bi-cloud-sun-fill"></i>
                 </span>
@@ -120,50 +114,73 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link text-white-50 px-3 active fw-medium" href="{{ route('home') }}">Beranda</a>
+                        <a class="nav-link text-white-50 px-3 active fw-medium" href="{{ url('/') }}">Beranda</a>
                     </li>
 
-                    @auth
-                        <!-- JIKA LOGIN SEBAGAI ADMIN / USER (Sesuai Auth Laravel Utama) -->
-                        <li class="nav-item">
-                            <a class="btn btn-outline-info btn-sm rounded-pill px-3" href="{{ route('admin.logs') }}">
-                                <i class="bi bi-journal-text me-1"></i> Log Aktivitas
-                            </a>
-                        </li>
-
+                    @if(session('admin_logged_in'))
+                        <!-- PROFIL DROPDOWN UNTUK ADMIN -->
                         <li class="nav-item dropdown ms-lg-2">
                             <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
-                                <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
-                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                    A
                                 </div>
-                                {{ auth()->user()->name }}
+                                Administrator
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2">
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
                                 <li>
-                                    <form action="{{ route('logout') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger py-2 fw-medium">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Keluar
-                                        </button>
-                                    </form>
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="{{ route('admin.dashboard') }}">
+                                        <i class="bi bi-speedometer2 me-2 text-warning"></i>Panel Admin
+                                    </a>
+                                </li>
+                                @if(Route::has('admin.logs'))
+                                <li>
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="{{ route('admin.logs') }}">
+                                        <i class="bi bi-journal-text me-2 text-info"></i>Log Aktivitas
+                                    </a>
+                                </li>
+                                @endif
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="{{ route('admin.logout') }}">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar Admin
+                                    </a>
                                 </li>
                             </ul>
                         </li>
+
+                    @elseif(session('user_logged_in'))
+                        <!-- PROFIL DROPDOWN UNTUK USER LOGGED IN -->
+                        <li class="nav-item dropdown ms-lg-2">
+                            <a class="nav-link dropdown-toggle text-white fw-semibold d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                                <div class="rounded-circle bg-info text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                    U
+                                </div>
+                                Pengguna Wisata
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2">
+                                <li>
+                                    <a class="dropdown-item text-danger py-2 fw-medium" href="{{ route('user.logout') }}">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                     @else
-                        <!-- JIKA BELUM LOGIN (Satu Tempat Sign In / Sign Up di Atas) -->
+                        <!-- TAMPILAN JIKA BELUM LOGIN -->
                         <li class="nav-item">
-                            <a class="nav-link text-white px-3 fw-medium" href="{{ route('login') }}">Masuk</a>
+                            <a class="nav-link text-white px-3 fw-medium" href="{{ route('user.login') }}">Masuk</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="{{ route('register') }}">Daftar</a>
+                            <a class="btn btn-info text-dark fw-bold rounded-pill px-4 ms-lg-2" href="{{ route('admin.login') }}">Admin Login</a>
                         </li>
-                    @endauth
+                    @endif
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Alert Notifikasi -->
+    <!-- Notifikasi Alert -->
     <div class="container mt-3">
         @if(session('success'))
             <div class="alert alert-success alert-dismissible border-0 shadow-sm rounded-4 fade show" role="alert">

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\Location;
 
 class LocationController extends Controller
 {
@@ -68,6 +67,9 @@ class LocationController extends Controller
     // ================= HALAMAN ADMIN =================
     public function showLogin()
     {
+        if (session()->has('admin_logged_in')) {
+            return redirect()->route('admin.dashboard');
+        }
         return view('admin.login');
     }
 
@@ -75,7 +77,7 @@ class LocationController extends Controller
     {
         if ($request->username === 'ekahido' && $request->password === 'ekahido22') {
             session(['admin_logged_in' => true]);
-            return redirect()->back();
+            return redirect()->route('admin.dashboard');
         }
         return redirect()->back()->with('error', 'Kredensial Admin Salah!');
     }
@@ -88,6 +90,10 @@ class LocationController extends Controller
 
     public function adminPanel(Request $request)
     {
+        if (!session()->has('admin_logged_in')) {
+            return redirect()->route('admin.login');
+        }
+
         $page = $request->query('page', 'weather'); 
         $data = [];
         
@@ -104,13 +110,13 @@ class LocationController extends Controller
         return view('admin.dashboard', compact('page', 'data'));
     }
 
-    // ================= SIMPAN & UPDATE DATA (BEBAS ERROR 500) =================
+    // ================= SIMPAN & UPDATE DATA (AMAN DARI ERROR 500) =================
     public function store(Request $request)
     {
         $location_id = $request->input('location_id');
         $image_url = $request->input('image_url');
 
-        // Handle upload file fisik
+        // Handling Upload Foto File
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $image_url = $request->file('image')->store('locations', 'public');
         }
