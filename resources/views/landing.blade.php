@@ -51,15 +51,17 @@
                             </div>
                         </div>
                         <!-- Keterbaruan Informasi Cuaca untuk User -->
-                        <div class="flex items-center text-sm text-gray-500 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-4">
-                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span>
-                                Data cuaca diperbarui: 
-                                <strong>{{ $location->updated_at->translatedFormat('d F Y, H:i') }} WIB</strong> 
-                                <span class="text-gray-400">({{ $location->updated_at->diffForHumans() }})</span>
-                            </span>
+                        <div class="d-flex align-items-center small text-secondary bg-light p-3 rounded-3 border mb-4">
+                            <i class="bi bi-clock-history me-2 text-primary"></i>
+                            @if($loc->latestWeather)
+                                <span>
+                                    Data cuaca diperbarui:
+                                    <strong>{{ $loc->latestWeather->recorded_at->translatedFormat('d F Y, H:i') }} WIB</strong>
+                                    <span class="text-muted">({{ $loc->latestWeather->recorded_at->diffForHumans() }})</span>
+                                </span>
+                            @else
+                                <span>Data cuaca belum tersedia untuk lokasi ini.</span>
+                            @endif
                         </div>
 
                         <!-- Action Button -->
