@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Models\Location;
+use App\Models\AuditLog;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +33,11 @@ Route::middleware('auth')->group(function () {
 });
 
 // 4. Admin Panel Routes (Khusus Admin)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/logs', function () {
+        $auditLogs = AuditLog::with('user')->latest()->paginate(20);
+        return view('admin.logs', compact('auditLogs'));
+    })->name('admin.logs');
     
     // Daftar & Manajemen Lokasi
     Route::get('/locations', function () {
